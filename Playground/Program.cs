@@ -115,6 +115,7 @@ namespace StreamSplitterExperiment
             MMALCamera cam = MMALCamera.Instance;
 
             MMALCameraConfig.InlineHeaders = true;
+            MMALCameraConfig.Resolution = new MMALSharp.Common.Utility.Resolution(1920, 1080);
 
             cam.ConfigureCameraSettings();
 
