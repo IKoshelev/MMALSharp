@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\src\MMALSharp.FFmpeg\MMALSharp.FFmpeg.csproj" />
     <ProjectReference Include="..\src\MMALSharp\MMALSharp.csproj" />
   </ItemGroup>
 

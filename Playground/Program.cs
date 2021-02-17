@@ -11,6 +11,9 @@ using MMALSharp.Handlers;
 using MMALSharp.Components;
 using MMALSharp.Ports;
 using MMALSharp.Common;
+using MMALSharp.Common.Utility;
+using MMALSharp.Processors.Motion;
+using MMALSharp.Ports.Outputs;
 
 namespace StreamSplitterExperiment
 {
@@ -112,39 +115,55 @@ namespace StreamSplitterExperiment
             Symaphore symaphore,
             CancellationToken token = default)
         {
-            MMALCamera cam = MMALCamera.Instance;
+            var cam = MMALCamera.Instance;
 
-            MMALCameraConfig.InlineHeaders = true;
-            MMALCameraConfig.Resolution = new MMALSharp.Common.Utility.Resolution(1920, 1080);
-
+            // Set 640 x 480 at 20 FPS.
+            MMALCameraConfig.Resolution = new Resolution(640, 480);
+            MMALCameraConfig.SensorMode = MMALSensorMode.Mode7;
+            MMALCameraConfig.Framerate = 20;
             cam.ConfigureCameraSettings();
 
-            await Task.Delay(2000);
+            var motionAlgorithm = new MotionAlgorithmRGBDiff();
 
-            symaphore.StreamVideo = false;
-            using (var vidEncoder = new MMALVideoEncoder())
+            // Use the default configuration.
+            var motionConfig = new MotionConfig(algorithm: motionAlgorithm);
+
+            // Helper method to configure ExternalProcessCaptureHandlerOptions. There are
+            // many optional arguments but they are generally optimized for the recommended
+            // 640 x 480-based motion detection image stream.
+            // This manages the ffmpeg and clvc processes running under a separate bash shell.
+            using (var shell = VLCCaptureHandler.StreamRawRGB24asMJPEG())
+
+            // This version of the constructor is specific to running in analysis mode. The null
+            // argument could be replaced with a motion detection delegate like those provided to
+            // cam.WithMotionDetection() for normal motion detection usage.
+            using (var motion = new FrameBufferCaptureHandler(motionConfig, null))
+
+            // Although we've already set the camera resolution, this allows us to specify the raw
+            // format required to drive the motion detection algorithm.
+            using (var resizer = new MMALIspComponent())
             {
-                var portConfig = new MMALPortConfig(MMALEncoding.H264, MMALEncoding.I420, 25, 0, null);
+                // This tells the algorithm to generate the analysis images and feed them
+                // to an output capture handler (in this case our ffmpeg / cvlc pipeline).
+                motionAlgorithm.EnableAnalysis(shell);
 
-                vidEncoder.ConfigureOutputPort(portConfig, h264PipeWriter);
+                resizer.ConfigureOutputPort<VideoPort>(0, new MMALPortConfig(MMALEncoding.RGB24, MMALEncoding.RGB24, width: 640, height: 480), motion);
+                cam.Camera.VideoPort.ConnectTo(resizer);
 
-                // Create our component pipeline.
-                cam.Camera.VideoPort.ConnectTo(vidEncoder);
-                //this.Camera.PreviewPort.ConnectTo(renderer);
+                // Camera warm-up.
+                await Task.Delay(2000);//cameraWarmupDelay(cam);
 
-                symaphore.RequestIFrame = () =>
-                {
-                    Console.WriteLine("Requesting IFrame");
-                    vidEncoder.RequestIFrame();
-                    h264PipeWriter.PauseWritingTillIframe = true;
-                };
+                // Tell the user how to connect to the MJPEG stream.
+                Console.WriteLine($"Streaming MJPEG with motion detection analysis for {30} sec to:");
+                Console.WriteLine($"http://{Environment.MachineName}.local:8554/");
 
-                var source = new CancellationTokenSource(TimeSpan.FromSeconds(100));
-                Console.WriteLine($"starting vid stream");
-                await cam.ProcessAsync(cam.Camera.VideoPort, source.Token).ConfigureAwait(false);
-                Console.WriteLine($"ending vid stream");
+                // Set the duration and let it run...
+                var stoppingToken = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                await Task.WhenAll(new Task[]{
+                shell.ProcessExternalAsync(stoppingToken.Token),
+                cam.ProcessAsync(cam.Camera.VideoPort, stoppingToken.Token),
+            }).ConfigureAwait(false);
             }
-
             cam.Cleanup();
         }
     }
