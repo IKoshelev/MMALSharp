@@ -121,12 +121,18 @@ namespace StreamSplitterExperiment
             MMALCameraConfig.Resolution = new Resolution(640, 480);
             MMALCameraConfig.SensorMode = MMALSensorMode.Mode7;
             MMALCameraConfig.Framerate = 20;
+            MMALCameraConfig.ISO = 800;
             cam.ConfigureCameraSettings();
 
-            var motionAlgorithm = new MotionAlgorithmRGBDiff();
+            var motionAlgorithm = new MotionAlgorithmRGBDiff(
+                rgbThreshold: 50,
+                cellPixelPercentage: 30,
+                cellCountThreshold: 12);
 
             // Use the default configuration.
-            var motionConfig = new MotionConfig(algorithm: motionAlgorithm);
+            var motionConfig = new MotionConfig(algorithm: motionAlgorithm, 
+                testFrameInterval: TimeSpan.FromSeconds(3),
+                testFrameCooldown: TimeSpan.FromSeconds(3));
 
             // Helper method to configure ExternalProcessCaptureHandlerOptions. There are
             // many optional arguments but they are generally optimized for the recommended
@@ -137,7 +143,10 @@ namespace StreamSplitterExperiment
             // This version of the constructor is specific to running in analysis mode. The null
             // argument could be replaced with a motion detection delegate like those provided to
             // cam.WithMotionDetection() for normal motion detection usage.
-            using (var motion = new FrameBufferCaptureHandler(motionConfig, null))
+            using (var motion = new FrameBufferCaptureHandler(motionConfig, () => 
+            {
+                Console.WriteLine("Motion!");
+            }))
 
             // Although we've already set the camera resolution, this allows us to specify the raw
             // format required to drive the motion detection algorithm.
@@ -154,11 +163,11 @@ namespace StreamSplitterExperiment
                 await Task.Delay(2000);//cameraWarmupDelay(cam);
 
                 // Tell the user how to connect to the MJPEG stream.
-                Console.WriteLine($"Streaming MJPEG with motion detection analysis for {30} sec to:");
+                Console.WriteLine($"Streaming MJPEG with motion detection analysis for {60} sec to:");
                 Console.WriteLine($"http://{Environment.MachineName}.local:8554/");
 
                 // Set the duration and let it run...
-                var stoppingToken = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                var stoppingToken = new CancellationTokenSource(TimeSpan.FromSeconds(100));
                 await Task.WhenAll(new Task[]{
                 shell.ProcessExternalAsync(stoppingToken.Token),
                 cam.ProcessAsync(cam.Camera.VideoPort, stoppingToken.Token),
