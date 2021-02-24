@@ -149,7 +149,7 @@ namespace StreamSplitterExperiment
             // cam.WithMotionDetection() for normal motion detection usage.      
             using (var motion = new FrameBufferCaptureHandler(motionConfig, () => 
             {
-                motionProxy?.WriteFrame();
+                //motionProxy?.WriteFrame();
                 Console.WriteLine("Motion!");
             }))
             
@@ -157,10 +157,10 @@ namespace StreamSplitterExperiment
             // format required to drive the motion detection algorithm.
             using (var resizer = new MMALIspComponent())
             {
-                motionProxy = motion;
-                motionProxy.FileDirectory = "./";
-                motionProxy.FileExtension = "bmp";
-                motionProxy.FileDateTimeFormat = "yyyy-MM-dd HH.mm.ss.ffff";
+                //motionProxy = motion;
+                //motionProxy.FileDirectory = "./";
+                //motionProxy.FileExtension = "bmp";
+                //motionProxy.FileDateTimeFormat = "yyyy-MM-dd HH.mm.ss.ffff";
 
                 // This tells the algorithm to generate the analysis images and feed them
                 // to an output capture handler (in this case our ffmpeg / cvlc pipeline).
