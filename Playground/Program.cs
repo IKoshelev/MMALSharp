@@ -136,6 +136,8 @@ namespace StreamSplitterExperiment
                 testFrameCooldown: TimeSpan.FromSeconds(3),
                 resetTestFrameOnMotion: true);
 
+            FrameBufferCaptureHandler motionProxy = null;
+
             // Helper method to configure ExternalProcessCaptureHandlerOptions. There are
             // many optional arguments but they are generally optimized for the recommended
             // 640 x 480-based motion detection image stream.
@@ -144,9 +146,10 @@ namespace StreamSplitterExperiment
 
             // This version of the constructor is specific to running in analysis mode. The null
             // argument could be replaced with a motion detection delegate like those provided to
-            // cam.WithMotionDetection() for normal motion detection usage.
+            // cam.WithMotionDetection() for normal motion detection usage.      
             using (var motion = new FrameBufferCaptureHandler(motionConfig, () => 
             {
+                motionProxy?.WriteFrame();
                 Console.WriteLine("Motion!");
             }))
             
@@ -154,6 +157,11 @@ namespace StreamSplitterExperiment
             // format required to drive the motion detection algorithm.
             using (var resizer = new MMALIspComponent())
             {
+                motionProxy = motion;
+                motionProxy.FileDirectory = "./";
+                motionProxy.FileExtension = "jpeg";
+                motionProxy.FileDateTimeFormat = "yyyy-MM-dd HH.mm.ss.ffff";
+
                 // This tells the algorithm to generate the analysis images and feed them
                 // to an output capture handler (in this case our ffmpeg / cvlc pipeline).
                 motionAlgorithm.EnableAnalysis(shell);
