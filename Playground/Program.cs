@@ -122,6 +122,7 @@ namespace StreamSplitterExperiment
             MMALCameraConfig.SensorMode = MMALSensorMode.Mode7;
             MMALCameraConfig.Framerate = 20;
             MMALCameraConfig.ISO = 800;
+            MMALCameraConfig.AwbMode = MMALSharp.Native.MMAL_PARAM_AWBMODE_T.MMAL_PARAM_AWBMODE_AUTO;
             cam.ConfigureCameraSettings();
 
             var motionAlgorithm = new MotionAlgorithmRGBDiff(
@@ -132,7 +133,8 @@ namespace StreamSplitterExperiment
             // Use the default configuration.
             var motionConfig = new MotionConfig(algorithm: motionAlgorithm, 
                 testFrameInterval: TimeSpan.FromSeconds(3),
-                testFrameCooldown: TimeSpan.FromSeconds(3));
+                testFrameCooldown: TimeSpan.FromSeconds(3),
+                resetTestFrameOnMotion: true);
 
             // Helper method to configure ExternalProcessCaptureHandlerOptions. There are
             // many optional arguments but they are generally optimized for the recommended
@@ -147,7 +149,7 @@ namespace StreamSplitterExperiment
             {
                 Console.WriteLine("Motion!");
             }))
-
+            
             // Although we've already set the camera resolution, this allows us to specify the raw
             // format required to drive the motion detection algorithm.
             using (var resizer = new MMALIspComponent())

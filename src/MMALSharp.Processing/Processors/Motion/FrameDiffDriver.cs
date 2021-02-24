@@ -123,7 +123,7 @@ namespace MMALSharp.Processors.Motion
                 }
             }
 
-            this.TryUpdateTestFrame();
+            this.UpdateTestFrameMaybe(this._motionConfig.ResetTestFrameOnMotion && detected);
         }
 
         /// <summary>
@@ -173,6 +173,7 @@ namespace MMALSharp.Processors.Motion
 
         private void PrepareTestFrame()
         {
+            Console.WriteLine("PrepareTestFrame");
             this.TestFrame = this.WorkingData.ToArray();
 
             if (_motionConfig.TestFrameInterval != TimeSpan.Zero)
@@ -183,13 +184,14 @@ namespace MMALSharp.Processors.Motion
 
         // Periodically replaces the test frame with the current frame, which helps when a scene
         // changes over time (such as changing shadows throughout the day).
-        private void TryUpdateTestFrame()
+        private void UpdateTestFrameMaybe(bool force = false)
         {
-            // Exit if the update interval has not elapsed, or if there was recent motion
-            if (_motionConfig.TestFrameInterval == TimeSpan.Zero
-                || _testFrameAge.Elapsed < _motionConfig.TestFrameInterval
-                || (_motionConfig.TestFrameRefreshCooldown != TimeSpan.Zero
-                && this.LastDetectionEvent.Elapsed < _motionConfig.TestFrameRefreshCooldown))
+            var shouldSkip = !force && 
+                    (_motionConfig.TestFrameInterval == TimeSpan.Zero
+                    || _testFrameAge.Elapsed < _motionConfig.TestFrameInterval
+                    || (_motionConfig.TestFrameRefreshCooldown != TimeSpan.Zero && this.LastDetectionEvent.Elapsed < _motionConfig.TestFrameRefreshCooldown));
+
+            if(shouldSkip)
             {
                 return;
             }

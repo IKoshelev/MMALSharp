@@ -35,6 +35,10 @@ namespace MMALSharp.Processors.Motion
         public string MotionMaskPathname { get; set; }
 
         /// <summary>
+        /// </summary>
+        public bool ResetTestFrameOnMotion { get; set; }
+
+        /// <summary>
         /// Creates a new instance of <see cref="MotionConfig"/>.
         /// </summary>
         /// <param name="algorithm">An instance of the motion detection algorithm implementation.</param>
@@ -43,14 +47,16 @@ namespace MMALSharp.Processors.Motion
         /// <param name="motionMaskPathname">Pathname to an optional motion-detection mask bitmap.</param>
         public MotionConfig(
             IMotionAlgorithm algorithm,
-            TimeSpan testFrameInterval = default, 
+            TimeSpan testFrameInterval = default,
             TimeSpan testFrameCooldown = default, 
-            string motionMaskPathname = null)
+            string motionMaskPathname = null,
+            bool resetTestFrameOnMotion = false)
         {
             this.MotionAlgorithm = algorithm;
             this.TestFrameInterval = testFrameInterval.Equals(TimeSpan.Zero) ? TimeSpan.FromSeconds(10) : testFrameInterval;
             this.TestFrameRefreshCooldown = testFrameCooldown.Equals(TimeSpan.Zero) ? TimeSpan.FromSeconds(3) : testFrameCooldown;
             this.MotionMaskPathname = motionMaskPathname;
+            this.ResetTestFrameOnMotion = resetTestFrameOnMotion;
         }
     }
 }

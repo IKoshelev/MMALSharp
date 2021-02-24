@@ -158,22 +158,7 @@ namespace MMALSharp.Processors.Motion
                     int rgb2 = r + g + b;
 
                     int rgbDiff = Math.Abs(rgb2 - rgb1);
-                    //if (rgbDiff > parameters.RGBThreshold)
-                    //{
-                    //    diff++;
-                    //}
-
-                    //Experiment with individual channel diff
-                    bool testPixelChannel(int pixelChannelIndex)
-                    {
-                        var channelDiff = driver.TestFrame[pixelChannelIndex] - driver.CurrentFrame[pixelChannelIndex];
-                        channelDiff = Math.Abs(channelDiff);
-                        return channelDiff > parameters.RGBThreshold;
-                    }
-
-                    if (testPixelChannel(index) 
-                        || testPixelChannel(index + 1) 
-                        || testPixelChannel(index + 2))
+                    if (rgbDiff > parameters.RGBThreshold)
                     {
                         diff++;
                     }
@@ -191,9 +176,9 @@ namespace MMALSharp.Processors.Motion
                         // No early exit for analysis purposes
 
                         // Output in grayscale based on strength of the diff (765 = 255 x 3)
-                        //r = Math.Min((byte)255, (byte)((rgbDiff / 765f) * 255.999f));
-                        //g = r;
-                        //b = r;
+                        r = Math.Min((byte)255, (byte)((rgbDiff / 765f) * 255.999f));
+                        g = r;
+                        b = r;
 
                         // Highlight cell corners
                         if ((col == rect.X || col == x2 - 1) && (row == rect.Y || row == y2 - 1))
