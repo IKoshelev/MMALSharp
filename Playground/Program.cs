@@ -159,7 +159,7 @@ namespace StreamSplitterExperiment
             {
                 motionProxy = motion;
                 motionProxy.FileDirectory = "./";
-                motionProxy.FileExtension = "jpeg";
+                motionProxy.FileExtension = "bmp";
                 motionProxy.FileDateTimeFormat = "yyyy-MM-dd HH.mm.ss.ffff";
 
                 // This tells the algorithm to generate the analysis images and feed them
