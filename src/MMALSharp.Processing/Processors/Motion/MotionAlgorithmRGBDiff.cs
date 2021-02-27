@@ -123,7 +123,7 @@ namespace MMALSharp.Processors.Motion
         private void CheckDiff(long cellIndex, FrameDiffDriver driver, FrameAnalysisMetadata metadata, ThreadSafeParameters parameters)
         {
             // FrameAnalysisMetadata and ThreadSafeParameters are structures; they are by-value copies and all fields are value-types which makes them thread safe
-
+            Console.WriteLine(System.Numerics.Vector.IsHardwareAccelerated);
             int diff = 0;
             var rect = driver.CellRect[cellIndex];
 
