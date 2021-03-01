@@ -76,19 +76,19 @@ namespace MMALSharp.Processors
         /// Tracks whether a full frame has been received and processed yet. Fields and properties
         /// like <see cref="CellRect"/> and <see cref="Metadata"/> are not valid until this is true.
         /// </summary>
-        internal bool CompletedFirstFrame = false;
+        public bool CompletedFirstFrame = false;
 
         /// <summary>
         /// Represents the coordinates of each test cell for parallel processing. This is
         /// threadsafe if threads do not access overlapping array indices.
         /// </summary>
-        internal Rectangle[] CellRect;
+        public Rectangle[] CellRect;
 
         /// <summary>
         /// A byte array representation of the FrameAnalyser's own WorkingData object. Required
         /// to provide fast thread-safe access for parallel analysis.
         /// </summary>
-        internal byte[] CurrentFrame;
+        public byte[] CurrentFrame;
 
         /// <summary>
         /// Frame details collected when the first full frame is available. This is a struct and is

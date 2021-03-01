@@ -19,31 +19,31 @@ namespace MMALSharp.Processors
         /// <summary>
         /// Frame width in pixels.
         /// </summary>
-        internal int Width;
+        public int Width;
 
         /// <summary>
         /// Frame height in pixels.
         /// </summary>
-        internal int Height;
+        public int Height;
 
         /// <summary>
         /// Frame stride (bytes per row).
         /// </summary>
-        internal int Stride;
+        public int Stride;
 
         /// <summary>
         /// Frame bytes per pixel.
         /// </summary>
-        internal int Bpp;
+        public int Bpp;
 
         /// <summary>
         /// Width of a parallel processing cell in pixels.
         /// </summary>
-        internal int CellWidth;
+        public int CellWidth;
 
         /// <summary>
         /// Height of a parallel processing cell in pixels.
         /// </summary>
-        internal int CellHeight;
+        public int CellHeight;
     }
 }

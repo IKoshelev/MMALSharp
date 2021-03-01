@@ -125,8 +125,8 @@ namespace StreamSplitterExperiment
             MMALCameraConfig.AwbMode = MMALSharp.Native.MMAL_PARAM_AWBMODE_T.MMAL_PARAM_AWBMODE_AUTO;
             cam.ConfigureCameraSettings();
 
-            var motionAlgorithm = new MotionAlgorithmRGBDiff(
-                rgbThreshold: 50,
+            var motionAlgorithm = new MotionAlgorhytmPerchannelDiffWithNEON_SIMD(
+                perChannelTrheshold: 50,
                 cellPixelPercentage: 30,
                 cellCountThreshold: 12);
 

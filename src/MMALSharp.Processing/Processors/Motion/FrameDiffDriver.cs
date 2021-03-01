@@ -28,17 +28,17 @@ namespace MMALSharp.Processors.Motion
         /// <summary>
         /// Fully black pixels are skipped when comparing the test frame to the current frame.
         /// </summary>
-        internal byte[] FrameMask;
+        public byte[] FrameMask;
 
         /// <summary>
         ///  This is the image we are comparing against new incoming frames.
         /// </summary>
-        internal byte[] TestFrame;
+        public byte[] TestFrame;
 
         /// <summary>
         /// The number of pixels that differ in each cell between the test frame and current frame.
         /// </summary>
-        internal int[] CellDiff;
+        public int[] CellDiff;
 
         private Action _onDetect;
         private MotionConfig _motionConfig;
