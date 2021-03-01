@@ -7,6 +7,7 @@
 using MMALSharp.Common;
 using MMALSharp.Handlers;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace MMALSharp.Processors.Motion
@@ -88,6 +89,7 @@ namespace MMALSharp.Processors.Motion
         /// <inheritdoc />
         public bool DetectMotion(FrameDiffDriver driver, FrameAnalysisMetadata metadata)
         {
+            var stopwatch = new Stopwatch();
             Parallel.ForEach(driver.CellDiff, (cell, loopState, loopIndex)
                 => CheckDiff(loopIndex, driver, metadata, _parameters));
 
@@ -118,6 +120,8 @@ namespace MMALSharp.Processors.Motion
                 _outputHandler?.Process(_fullRawFrameImageContext);
             }
 
+            stopwatch.Stop();
+            Console.WriteLine($"Frame processed in {stopwatch.ElapsedMilliseconds}ms");
             return detected;
         }
 
