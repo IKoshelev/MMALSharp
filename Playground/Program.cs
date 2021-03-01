@@ -17,6 +17,7 @@ using MMALSharp.Ports.Outputs;
 using System.Numerics;
 using System.Linq;
 using Intrinsics = System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics;
 
 namespace StreamSplitterExperiment
 {
@@ -289,70 +290,33 @@ namespace StreamSplitterExperiment
             byte bit = 1;
             var VECTOR_ONE = Intrinsics.Vector128.Create(bit, bit, bit, bit, bit, bit, bit, bit, bit, bit, bit, bit, bit, bit, bit, bit);
 
-            var result = new Intrinsics.Vector128<uint>();
+            var result = new Intrinsics.Vector128<int>();
             var i = 0;
             for (i = 0; i <= lhs.Length - 16; i += 16)
             {
-                var v64a = Intrinsics.Vector128.Create(
-                    lhs[i],
-                    lhs[i + 1],
-                    lhs[i + 2],
-                    lhs[i + 3],
-                    lhs[i + 4],
-                    lhs[i + 5],
-                    lhs[i + 6],
-                    lhs[i + 7],
-                    lhs[i + 8],
-                    lhs[i + 9],
-                    lhs[i + 10],
-                    lhs[i + 11],
-                    lhs[i + 12],
-                    lhs[i + 13],
-                    lhs[i + 14],
-                    lhs[i + 15]
-                    );
+                //using System.Numerics.Vector for loading, then converting to Intrinsics.Vector128
+                var v128a = new Vector<byte>(lhs, i).AsVector128();
+                var v128b = new Vector<byte>(rhs, i).AsVector128();
 
-                var v64b = Intrinsics.Vector128.Create(
-                    rhs[i],
-                    rhs[i + 1],
-                    rhs[i + 2],
-                    rhs[i + 3],
-                    rhs[i + 4],
-                    rhs[i + 5],
-                    rhs[i + 6],
-                    rhs[i + 7],
-                    rhs[i + 8],
-                    rhs[i + 9],
-                    rhs[i + 10],
-                    rhs[i + 11],
-                    rhs[i + 12],
-                    rhs[i + 13],
-                    rhs[i + 14],
-                    rhs[i + 15]
-                    );
-
-                var subtracted = Intrinsics.Arm.AdvSimd.AbsoluteDifference(v64a, v64b);
+                var subtracted = Intrinsics.Arm.AdvSimd.AbsoluteDifference(v128a, v128b);
                 //Console.WriteLine(subtracted.ToString());
 
                 var thresholdPassed = Intrinsics.Arm.AdvSimd.CompareGreaterThanOrEqual(subtracted, threshold);
 
-                var normalized =  Intrinsics.Arm.AdvSimd.And(thresholdPassed, VECTOR_ONE);
+                var normalized = Intrinsics.Vector128.AsSByte(thresholdPassed);    //Intrinsics.Arm.AdvSimd.And(thresholdPassed, VECTOR_ONE);
                 //Console.WriteLine(normalized);
 
-                //dot product does not work yet :-(
                 var rtemp = Intrinsics.Arm.AdvSimd.AddPairwiseWidening(normalized);
                 result = Intrinsics.Arm.AdvSimd.AddPairwiseWideningAndAdd(result, rtemp);
                 //Console.WriteLine(result);
-
-                //result += Intrinsics.Arm.Dp.Arm64.IsSupported;   //DotProduct  (normalized, VECTOR_ONE);
             }
 
             //Console.WriteLine(r4);
             //Console.WriteLine(r5);
-            return (int)(Intrinsics.Arm.AdvSimd.Extract(result, 0)
-                        + Intrinsics.Arm.AdvSimd.Extract(result, 1)
-                        + Intrinsics.Arm.AdvSimd.Extract(result, 2)
-                        + Intrinsics.Arm.AdvSimd.Extract(result, 3));
+            return -1 * (int)(Intrinsics.Arm.AdvSimd.Extract(result, 0)
+                            + Intrinsics.Arm.AdvSimd.Extract(result, 1)
+                            + Intrinsics.Arm.AdvSimd.Extract(result, 2)
+                            + Intrinsics.Arm.AdvSimd.Extract(result, 3));
         }
 
         public static int ScalarTest(byte[] lhs, byte[] rhs)
